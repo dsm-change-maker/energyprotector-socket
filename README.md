@@ -13,4 +13,7 @@ $ python socket_server.py
 
 # Socket Client Example for API Server 실행
 $ python example_socket_client_api.py
+
+# Socket Client Example for RaspberryPi Gui 실행
+$ python example_socket_client_raspberry.py
 ```
