@@ -1,12 +1,12 @@
 import asyncio
 from ep_sock import client, constant, payload
 
-
 async def handler(reader: asyncio.StreamReader, writer: asyncio.StreamWriter):
     while True:
         payload_data: payload.Payload = payload.Payload()
         req_chk_payload: payload.Payload = payload.Payload()
         await payload_data.read(reader)
+        print()
 
         peer_name = writer.get_extra_info('peername')
         if not payload_data.status:
@@ -21,6 +21,7 @@ async def handler(reader: asyncio.StreamReader, writer: asyncio.StreamWriter):
         await req_chk_payload.req_ok_write(writer)
 
         print(f"[S] received: {len(payload_data.data)} bytes from {peer_name}")
+        print(f'[S] received: {payload_data.data} from {peer_name}')
         if client.get_client(payload_data.client_type, payload_data.raspberry_id, payload_data.raspberry_group) is None:
             if payload_data.client_type == constant.CLIENT_TYPE_API:
                 client.clients.append(client.Client(reader, writer, client_type=payload_data.client_type))
@@ -44,6 +45,12 @@ async def handler(reader: asyncio.StreamReader, writer: asyncio.StreamWriter):
                 await req_chk_payload.err_write(writer)
                 continue
             await payload_data.write(target.writer, to_raspberry=True)
+            raspberry_payload = payload.Payload()
+            await raspberry_payload.read(target.reader)
+            if raspberry_payload.status:
+                await req_chk_payload.req_ok_write(writer)
+                continue
+            await req_chk_payload.err_write(writer)
             continue
         elif payload_data.client_type == constant.CLIENT_TYPE_RASPBERRY:
             target = client.get_client(constant.CLIENT_TYPE_API)

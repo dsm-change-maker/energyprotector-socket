@@ -32,10 +32,12 @@ class Client:
     recv_data: payload.Payload
 
     def __init__(self, reader: asyncio.StreamReader = object, writer: asyncio.StreamWriter = object, client_type='',
-                 raspberry_id='',
-                 raspberry_group=''):
+                 raspberry_id='', raspberry_group='', host=constant.SERVER_URL, port=constant.SERVER_PORT):
         self.reader = reader
         self.writer = writer
+        self.host = host
+        self.port = port
+
         self.client_type = client_type
         self.raspberry_id = raspberry_id
         self.raspberry_group = raspberry_group
@@ -43,8 +45,8 @@ class Client:
         self.send_data = payload.Payload(client_type=self.client_type)
         self.recv_data = payload.Payload()
 
-    async def connect(self, host, port):
-        self.reader, self.writer = await asyncio.open_connection(host, port)
+    async def connect(self):
+        self.reader, self.writer = await asyncio.open_connection(self.host, self.port)
 
     def print(self, newline=False):
         if newline:
@@ -59,6 +61,8 @@ class Client:
 
     async def write(self, to_sock: bool = True, to_raspberry: bool = False, to_device: bool = False):
         self.send_data.client_type = self.client_type
+        self.send_data.raspberry_id = self.raspberry_id
+        self.send_data.raspberry_group = self.raspberry_group
         await self.send_data.write(self.writer, to_sock=to_sock, to_raspberry=to_raspberry, to_device=to_device)
         await self.read()
         is_ok = self.recv_data.status and self.recv_data.client_type == constant.CLIENT_TYPE_REQ_OK
@@ -77,6 +81,7 @@ class Client:
 
     async def read(self):
         await self.recv_data.read(self.reader)
+
 
 class ClientSendSignal:
     def __init__(self):
@@ -108,3 +113,11 @@ class ClientSendSignal:
             print('device_type : ' + self.device_type)
         print('unit_index :', self.unit_index)
         print('on_off :', self.on_off)
+
+
+async def register_new_client(client_someone: Client):
+    if await client_someone.write(to_sock=True):
+        await client_someone.read()
+        if client_someone.recv_data.status and client_someone.recv_data.client_type == constant.CLIENT_TYPE_REQ_OK:
+            return True
+    return False

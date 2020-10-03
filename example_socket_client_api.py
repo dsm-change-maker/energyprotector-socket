@@ -4,7 +4,7 @@ from ep_sock.socket_client_api import RunClientApiThread
 
 def main():
     send_signal = ClientSendSignal()
-    run_client_api_thread = RunClientApiThread(send_signal)
+    run_client_api_thread = RunClientApiThread(send_signal, debug=True)
     run_client_api_thread.start()
     while True:
         test_num = int(input('Input Num : '))

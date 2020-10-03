@@ -5,17 +5,13 @@ import threading
 
 class ClientApi(client.Client):
     def __init__(self, host, port):
-        super().__init__(client_type=constant.CLIENT_TYPE_API)
-        self.host = host
-        self.port = port
-
-    async def connect(self, **kwargs):
-        await super().connect(self.host, self.port)
+        super().__init__(client_type=constant.CLIENT_TYPE_API, host=host, port=port)
 
     async def write_control(self, rasp_id, rasp_group, d_id, d_type, unit_index, on_off):
-        self.send_data.client_type = constant.CLIENT_TYPE_API
-        self.send_data.raspberry_id = rasp_id
-        self.send_data.raspberry_group = rasp_group
+        self.client_type = constant.CLIENT_TYPE_API
+        self.raspberry_id = rasp_id
+        self.raspberry_group = rasp_group
+
         self.send_data.device_id = d_id
         self.send_data.device_type = d_type
         self.send_data.unit_index = unit_index
@@ -26,11 +22,15 @@ class ClientApi(client.Client):
         return await super().write(to_sock=True)
 
 
-async def run_client_api(signal: client.ClientSendSignal, debug=False):
-    if debug:
-        print('[C] RUN CLIENT_API')
-    client_api = ClientApi(constant.SERVER_URL, constant.SERVER_PORT)
+async def run_client_api(signal: client.ClientSendSignal, host=constant.SERVER_URL, port=constant.SERVER_PORT, debug=False):
+    print('[C] RUN CLIENT_API') if debug else None
+    client_api = ClientApi(host, port)
     await client_api.connect()
+
+    is_registered = await client.register_new_client(client_api)
+    print(f'[C] received : {len(client_api.recv_data.data)} bytes') if debug else None
+    print('[C] registered as a new client') if is_registered and debug else None
+
     while True:
         if signal.close:
             break
@@ -38,42 +38,37 @@ async def run_client_api(signal: client.ClientSendSignal, debug=False):
             if await client_api.write_control(signal.raspberry_id, signal.raspberry_group,
                                               signal.device_id,
                                               signal.device_type, signal.unit_index, signal.on_off):
-                if debug:
-                    print('[C] request Success')
+                print('[C] request Success') if debug else None
                 await client_api.read()
-                if debug:
-                    print('[C] received : ', client_api.recv_data.data)
+                print('[C] received : ', client_api.recv_data.data) if debug else None
                 if client_api.recv_data.status and client_api.recv_data.client_type == constant.CLIENT_TYPE_REQ_OK:
-                    if debug:
-                        print('[C] registered as a new client')
+                    print('[C] registered as a new client') if debug else None
                     signal.send = True
                     continue
-                signal.req_ok = True
+                signal.req_ok = client_api.recv_data.status
                 signal.send = False
-            if debug:
-                print('[C] Request failed')
+                continue
+            print('[C] Request failed') if debug else None
             signal.req_ok = False
             signal.send = False
             continue
 
-    is_closed = await client_api.close()
-    signal.req_ok = True
-    if not is_closed:
-        signal.req_ok = False
+    signal.req_ok = await client_api.close()
     signal.close = False
-    if debug:
-        print('[C]', 'CLOSED' if is_closed else 'FAILED TO CLOSE')
+    print('[C]', 'CLOSED' if signal.req_ok else 'FAILED TO CLOSE') if debug else None
 
 
 class RunClientApiThread(threading.Thread):
-    def __init__(self, signal: client.ClientSendSignal, debug=False):
+    def __init__(self, signal: client.ClientSendSignal, host=constant.SERVER_URL, port=constant.SERVER_PORT, debug=False):
         threading.Thread.__init__(self)
         self.signal = signal
         self.debug = debug
         self.daemon = True
+        self.host = host
+        self.port = port
 
     async def main(self):
-        await asyncio.wait([run_client_api(self.signal, self.debug)])
+        await asyncio.wait([run_client_api(self.signal, self.host, self.port, self.debug)])
 
     def run(self):
         asyncio.run(self.main())
