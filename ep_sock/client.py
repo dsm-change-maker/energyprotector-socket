@@ -1,6 +1,5 @@
 import asyncio
-import payload
-import constant
+from ep_sock import constant, payload
 
 clients = []
 
@@ -78,3 +77,34 @@ class Client:
 
     async def read(self):
         await self.recv_data.read(self.reader)
+
+class ClientSendSignal:
+    def __init__(self):
+        self.close: bool = False
+        self.send: bool = False
+        self.req_ok: bool = False
+
+        self.raspberry_id: str = ''
+        self.raspberry_group: str = ''
+        self.device_id: str = ''
+        self.device_type: str = ''
+        self.unit_index: int = 0
+        self.on_off: bool = False
+
+    def print(self, newline=False):
+        if newline:
+            print('')
+        print('--ClientSendSignal--')
+        print('close :', self.close)
+        print('send :', self.send)
+        print('req_ok :', self.req_ok)
+        if len(self.raspberry_id):
+            print('raspberry_id : ' + self.raspberry_id)
+        if len(self.raspberry_group):
+            print('raspberry_group : ' + self.raspberry_group)
+        if len(self.device_id):
+            print('device_id : ' + self.device_id)
+        if len(self.device_type):
+            print('device_type : ' + self.device_type)
+        print('unit_index :', self.unit_index)
+        print('on_off :', self.on_off)

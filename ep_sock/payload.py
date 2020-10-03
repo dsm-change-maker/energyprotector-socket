@@ -1,5 +1,5 @@
 import asyncio
-import constant
+from ep_sock import constant
 
 
 class Payload:
