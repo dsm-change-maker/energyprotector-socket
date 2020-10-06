@@ -49,6 +49,7 @@ async def handler(reader: asyncio.StreamReader, writer: asyncio.StreamWriter):
                 continue
             print(f'[S] Successfully fetched client information, {target.raspberry_id, target.raspberry_group}')
             await payload_data.write(target.writer, to_raspberry=True)
+            print(f'[S] OK : API Server -> Raspberry{target.raspberry_id, target.raspberry_group}')
             continue
         elif payload_data.client_type == constant.CLIENT_TYPE_RASPBERRY:
             target = client.get_client(constant.CLIENT_TYPE_API)
