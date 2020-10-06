@@ -1,10 +1,12 @@
 import asyncio
 from ep_sock import client, constant, payload
 
+
 async def handler(reader: asyncio.StreamReader, writer: asyncio.StreamWriter):
     while True:
         payload_data: payload.Payload = payload.Payload()
         req_chk_payload: payload.Payload = payload.Payload()
+
         await payload_data.read(reader)
         print()
 
@@ -22,7 +24,8 @@ async def handler(reader: asyncio.StreamReader, writer: asyncio.StreamWriter):
 
         print(f"[S] received: {len(payload_data.data)} bytes from {peer_name}")
         print(f'[S] received: {payload_data.data} from {peer_name}')
-        if client.get_client(payload_data.client_type, payload_data.raspberry_id, payload_data.raspberry_group) is None:
+        if len(client.get_client(payload_data.client_type, payload_data.raspberry_id,
+                                 payload_data.raspberry_group).client_type) is 0:
             if payload_data.client_type == constant.CLIENT_TYPE_API:
                 client.clients.append(client.Client(reader, writer, client_type=payload_data.client_type))
                 await req_chk_payload.req_ok_write(writer)
@@ -39,26 +42,22 @@ async def handler(reader: asyncio.StreamReader, writer: asyncio.StreamWriter):
         if payload_data.client_type == constant.CLIENT_TYPE_API:
             target = client.get_client(constant.CLIENT_TYPE_RASPBERRY, payload_data.raspberry_id,
                                        payload_data.raspberry_group)
-            if target is None:
+            if len(target.client_type) is 0:
                 print(
                     f'[S] error : get_client(CLIENT_TYPE_RASPBERRY, {payload_data.raspberry_id}, {payload_data.raspberry_group})')
                 await req_chk_payload.err_write(writer)
                 continue
+            print(f'[S] Successfully fetched client information, {target.raspberry_id, target.raspberry_group}')
             await payload_data.write(target.writer, to_raspberry=True)
-            raspberry_payload = payload.Payload()
-            await raspberry_payload.read(target.reader)
-            if raspberry_payload.status:
-                await req_chk_payload.req_ok_write(writer)
-                continue
-            await req_chk_payload.err_write(writer)
             continue
         elif payload_data.client_type == constant.CLIENT_TYPE_RASPBERRY:
             target = client.get_client(constant.CLIENT_TYPE_API)
-            if target is None:
+            if len(target.client_type) is 0:
                 print('[S] error : get_client(CLIENT_TYPE_API)')
                 await req_chk_payload.err_write(writer)
                 continue
             await payload_data.write(target.writer, to_sock=True)
+            print(f'[S] OK : Raspberry{payload_data.raspberry_id, payload_data.raspberry_group} -> Api Server')
             continue
 
 

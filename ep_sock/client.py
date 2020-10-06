@@ -4,23 +4,6 @@ from ep_sock import constant, payload
 clients = []
 
 
-def get_client(client_type=constant.CLIENT_TYPE_NONE, client_id='', client_group=''):
-    if client_type == constant.CLIENT_TYPE_API:
-        api_clients = list(filter(lambda c: c.client_type == constant.CLIENT_TYPE_API, clients))
-        if len(api_clients) is 0:
-            return None
-        return api_clients[0]
-    elif client_type == constant.CLIENT_TYPE_RASPBERRY:
-        raspberry_clients = list(filter(lambda c:
-                                        c.client_type == constant.CLIENT_TYPE_RASPBERRY and
-                                        c.raspberry_id == client_id and
-                                        c.raspberry_group == client_group, clients))
-        if len(raspberry_clients) is 0:
-            return None
-        return raspberry_clients[0]
-    return None
-
-
 class Client:
     reader: asyncio.StreamReader
     writer: asyncio.StreamWriter
@@ -31,7 +14,7 @@ class Client:
     send_data: payload.Payload
     recv_data: payload.Payload
 
-    def __init__(self, reader: asyncio.StreamReader = object, writer: asyncio.StreamWriter = object, client_type='',
+    def __init__(self, reader: asyncio.StreamReader = None, writer: asyncio.StreamWriter = None, client_type='',
                  raspberry_id='', raspberry_group='', host=constant.SERVER_URL, port=constant.SERVER_PORT):
         self.reader = reader
         self.writer = writer
@@ -113,6 +96,23 @@ class ClientSendSignal:
             print('device_type : ' + self.device_type)
         print('unit_index :', self.unit_index)
         print('on_off :', self.on_off)
+
+
+def get_client(client_type=constant.CLIENT_TYPE_NONE, client_id='', client_group='') -> Client:
+    if client_type == constant.CLIENT_TYPE_API:
+        api_clients = list(filter(lambda c: c.client_type == constant.CLIENT_TYPE_API, clients))
+        if len(api_clients) is 0:
+            return Client()
+        return api_clients[0]
+    elif client_type == constant.CLIENT_TYPE_RASPBERRY:
+        raspberry_clients = list(filter(lambda c:
+                                        c.client_type == constant.CLIENT_TYPE_RASPBERRY and
+                                        c.raspberry_id == client_id and
+                                        c.raspberry_group == client_group, clients))
+        if len(raspberry_clients) is 0:
+            return Client()
+        return raspberry_clients[0]
+    return Client()
 
 
 async def register_new_client(client_someone: Client):

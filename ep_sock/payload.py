@@ -75,7 +75,8 @@ class Payload:
             payload_string += self.raspberry_id + ';' + \
                               self.raspberry_group + ';'
         payload_string += '\n'
-        return payload_string.encode()
+        self.data = payload_string.encode()
+        return self.data
 
     def decode(self, encoded_string):
         data_len = 0

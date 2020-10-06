@@ -47,16 +47,20 @@ async def run_client_raspberry(signal: ClientSendSignalRaspberry, host=constant.
         # while True:
         #     if not signal.device_send:
         #         break
-        if signal.device_read:
-            if signal.device_req_ok:
-                await client_raspberry.write_ok()
-                continue
-            print('[C] error : device_req_ok') if debug else None
-            await client_raspberry.write_no()
-            continue
-        print('[C] error : device_read') if debug else None
-        await client_raspberry.write_no()
+        await client_raspberry.write_ok()
+        print('[C] OK')
         continue
+        #
+        # if signal.device_read:
+        #     if signal.device_req_ok:
+        #         await client_raspberry.write_ok()
+        #         continue
+        #     print('[C] error : device_req_ok') if debug else None
+        #     await client_raspberry.write_no()
+        #     continue
+        # print('[C] error : device_read') if debug else None
+        # await client_raspberry.write_no()
+        # continue
 
     signal.req_ok = await client_raspberry.close()
     signal.close = False
