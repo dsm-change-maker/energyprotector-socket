@@ -1,10 +1,16 @@
 from ep_sock.client import ClientSendSignal
 from ep_sock.socket_client_api import RunClientApiThread
+from ep_sock import constant
 
+# SERVER_URL = '52.78.77.85'
+# SERVER_PORT = 55642
+SERVER_URL = constant.SERVER_URL
+SERVER_PORT = constant.SERVER_PORT
 
 def main():
     send_signal = ClientSendSignal()
-    run_client_api_thread = RunClientApiThread(send_signal, debug=True)
+    run_client_api_thread = RunClientApiThread(send_signal, host=SERVER_URL, port=SERVER_PORT,
+                                               debug=True)
     run_client_api_thread.start()
     while True:
         test_num = int(input('Input Num : '))

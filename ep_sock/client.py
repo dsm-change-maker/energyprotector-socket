@@ -1,5 +1,5 @@
 import asyncio
-from ep_sock import constant, payload
+from ep_sock import constant, payload, util
 
 clients = []
 
@@ -15,15 +15,19 @@ class Client:
     recv_data: payload.Payload
 
     def __init__(self, reader: asyncio.StreamReader = None, writer: asyncio.StreamWriter = None, client_type='',
-                 raspberry_id='', raspberry_group='', host=constant.SERVER_URL, port=constant.SERVER_PORT):
+                 raspberry_id='', raspberry_group='', device_id='', device_type='', host=constant.SERVER_URL,
+                 port=constant.SERVER_PORT, recv_client_type=constant.CLIENT_TYPE_NONE):
         self.reader = reader
         self.writer = writer
         self.host = host
         self.port = port
 
         self.client_type = client_type
+        self.recv_client_type = recv_client_type
         self.raspberry_id = raspberry_id
         self.raspberry_group = raspberry_group
+        self.device_id = device_id
+        self.device_type = device_type
 
         self.send_data = payload.Payload(client_type=self.client_type)
         self.recv_data = payload.Payload()
@@ -32,21 +36,17 @@ class Client:
         self.reader, self.writer = await asyncio.open_connection(self.host, self.port)
 
     def print(self, newline=False):
-        if newline:
-            print('')
+        print('') if newline else None
         print('--Client--')
-        if len(self.client_type) is not 0:
-            print('client_type : ' + self.client_type)
-        if len(self.raspberry_id) is not 0:
-            print('raspberry_id : ' + self.raspberry_id)
-        if len(self.raspberry_group) is not 0:
-            print('raspberry_group : ' + self.raspberry_group)
+        util.print_client_type(self.client_type)
+        util.print_raspberry_info(self.raspberry_id, self.raspberry_group)
+        util.print_device_info(self.device_id, self.device_type)
 
     async def write(self, to_sock: bool = True, to_raspberry: bool = False, to_device: bool = False):
         self.send_data.client_type = self.client_type
         self.send_data.raspberry_id = self.raspberry_id
         self.send_data.raspberry_group = self.raspberry_group
-        await self.send_data.write(self.writer, to_sock=to_sock, to_raspberry=to_raspberry, to_device=to_device)
+        await self.send_data.write(self.writer, to_sock=to_sock, to_raspberry=to_raspberry, to_device=to_device, recv_client_type=self.recv_client_type)
         await self.read()
         is_ok = self.recv_data.status and self.recv_data.client_type == constant.CLIENT_TYPE_REQ_OK
         self.recv_data.__init__()
@@ -86,23 +86,17 @@ class ClientSendSignal:
         print('close :', self.close)
         print('send :', self.send)
         print('req_ok :', self.req_ok)
-        if len(self.raspberry_id):
-            print('raspberry_id : ' + self.raspberry_id)
-        if len(self.raspberry_group):
-            print('raspberry_group : ' + self.raspberry_group)
-        if len(self.device_id):
-            print('device_id : ' + self.device_id)
-        if len(self.device_type):
-            print('device_type : ' + self.device_type)
+        util.print_raspberry_info(self.raspberry_id, self.raspberry_group)
+        util.print_device_info(self.device_id, self.device_type)
         print('unit_index :', self.unit_index)
         print('on_off :', self.on_off)
 
 
-def get_client(client_type=constant.CLIENT_TYPE_NONE, client_id='', client_group='') -> Client:
+def _get_client(client_type=constant.CLIENT_TYPE_NONE, client_id='', client_group=''):
     if client_type == constant.CLIENT_TYPE_API:
         api_clients = list(filter(lambda c: c.client_type == constant.CLIENT_TYPE_API, clients))
         if len(api_clients) is 0:
-            return Client()
+            return None
         return api_clients[0]
     elif client_type == constant.CLIENT_TYPE_RASPBERRY:
         raspberry_clients = list(filter(lambda c:
@@ -110,9 +104,29 @@ def get_client(client_type=constant.CLIENT_TYPE_NONE, client_id='', client_group
                                         c.raspberry_id == client_id and
                                         c.raspberry_group == client_group, clients))
         if len(raspberry_clients) is 0:
-            return Client()
+            return None
         return raspberry_clients[0]
-    return Client()
+    elif client_type == constant.CLIENT_TYPE_DEVICE:
+        devices_clients = list(filter(lambda c:
+                                      c.client_type == constant.CLIENT_TYPE_DEVICE and
+                                      c.device_id == client_id and
+                                      c.device_type == client_group, clients))
+        if len(devices_clients) is 0:
+            return None
+        return devices_clients[0]
+    return None
+
+
+def get_client(client_type=constant.CLIENT_TYPE_NONE, client_id='', client_group=''):
+    ret = [False, None, f'[S] error : get_client{util.client_type_to_str(client_type), client_id, client_group}']
+    target = _get_client(client_type, client_id, client_group)
+    if target is not None:
+        ret[0] = True
+        ret[1] = target
+        ret[2] = f'[S] Successfully fetched client information - {client_id, client_group}'
+        if util.is_client_type_api(client_type):
+            ret[2] = f'[S] Successfully fetched client information - {util.client_type_to_str(client_type)}'
+    return ret
 
 
 async def register_new_client(client_someone: Client):

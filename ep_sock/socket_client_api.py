@@ -9,6 +9,7 @@ class ClientApi(client.Client):
 
     async def write_control(self, rasp_id, rasp_group, d_id, d_type, unit_index, on_off):
         self.client_type = constant.CLIENT_TYPE_API
+        self.recv_client_type = constant.CLIENT_TYPE_RASPBERRY
         self.raspberry_id = rasp_id
         self.raspberry_group = rasp_group
 
@@ -41,10 +42,6 @@ async def run_client_api(signal: client.ClientSendSignal, host=constant.SERVER_U
                 print('[C] request Success') if debug else None
                 await client_api.read()
                 print('[C] received : ', client_api.recv_data.data) if debug else None
-                if client_api.recv_data.status and client_api.recv_data.client_type == constant.CLIENT_TYPE_REQ_OK:
-                    print('[C] registered as a new client') if debug else None
-                    signal.send = True
-                    continue
                 signal.req_ok = client_api.recv_data.status
                 signal.send = False
                 continue
