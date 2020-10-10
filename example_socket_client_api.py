@@ -7,6 +7,7 @@ from ep_sock import constant
 SERVER_URL = constant.SERVER_URL
 SERVER_PORT = constant.SERVER_PORT
 
+
 def main():
     send_signal = ClientSendSignal()
     run_client_api_thread = RunClientApiThread(send_signal, host=SERVER_URL, port=SERVER_PORT,
@@ -14,6 +15,8 @@ def main():
     run_client_api_thread.start()
     while True:
         test_num = int(input('Input Num : '))
+        unit_index = int(input('Input Unit_index : '))
+        on_off = int(input('Input State : ')) == 1
         if test_num == -1:
             send_signal.close = True
             while True:
@@ -23,9 +26,9 @@ def main():
         send_signal.raspberry_id = 'rasp_id_' + str(test_num)
         send_signal.raspberry_group = 'rasp_group_' + str(test_num)
         send_signal.device_id = 'device_id_' + str(test_num)
-        send_signal.device_type = 'device_type_' + str(test_num)
-        send_signal.unit_index = 0
-        send_signal.on_off = True
+        send_signal.device_type = 'switch'
+        send_signal.unit_index = unit_index
+        send_signal.on_off = on_off
         send_signal.send = True
         while True:
             if not send_signal.send:

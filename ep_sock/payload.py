@@ -93,8 +93,11 @@ class Payload:
         await self.write(writer, recv_client_type=recv_client_type)
 
     async def write(self, writer: asyncio.StreamWriter, to_sock: bool = True, to_raspberry: bool = False,
-                    to_device: bool = False, recv_client_type=''):
-        writer.write(self.encode(to_sock=to_sock, to_raspberry=to_raspberry, to_device=to_device, recv_client_type=recv_client_type))
+                    to_device: bool = False, recv_client_type='', without_change=False):
+        if without_change:
+            writer.write(self.data)
+        else:
+            writer.write(self.encode(to_sock=to_sock, to_raspberry=to_raspberry, to_device=to_device, recv_client_type=recv_client_type))
         await writer.drain()
 
     async def read(self, reader: asyncio.StreamReader):

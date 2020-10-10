@@ -9,7 +9,7 @@ class ClientApi(client.Client):
 
     async def write_control(self, rasp_id, rasp_group, d_id, d_type, unit_index, on_off):
         self.client_type = constant.CLIENT_TYPE_API
-        self.recv_client_type = constant.CLIENT_TYPE_RASPBERRY
+        self.recv_client_type = ''
         self.raspberry_id = rasp_id
         self.raspberry_group = rasp_group
 

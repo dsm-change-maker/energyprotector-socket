@@ -33,21 +33,21 @@ async def handler(reader: asyncio.StreamReader, writer: asyncio.StreamWriter):
         client_type = payload_data.client_type
         recv_client_type = payload_data.recv_client_type
 
-        # 만약 클라이언트 타입이 허용되지 않은 값(or 정의되지 않은 값)이라면 Error 전송
-        if not util.is_client_type_allowed(client_type):
-            print(f'[S] error : disallowed client type - {peer_name}') if _debug else None
-            await req_chk_payload.err_write(writer)
-            continue
-        if not payload_data.status:
-            # 만약 요청 상태가 False 라면 Error 전송
-            print(f'[S] error : request failed from {peer_name}') if _debug else None
-            await req_chk_payload.err_write(writer)
-            return
+        # if not payload_data.status:
+        #     # 만약 요청 상태가 False 라면 Error 전송
+        #     print(f'[S] error : request failed from {peer_name}') if _debug else None
+        #     await req_chk_payload.err_write(writer)
+        #     return
         if util.is_client_type_close(client_type):
             # 만약 client_type 이 CLIENT_TYPE_CLOSE 라면 클라이언트와의 연결을 종료함
             print(f'[S] closed : client{peer_name}') if _debug else None
             await req_chk_payload.req_ok_write(writer)
             return
+        # 만약 클라이언트 타입이 허용되지 않은 값(or 정의되지 않은 값)이라면 Error 전송
+        if not util.is_client_type_allowed(client_type):
+            print(f'[S] error : disallowed client type - {peer_name}') if _debug else None
+            await req_chk_payload.err_write(writer)
+            continue
 
         # 요청을 정상적으로 읽었다면 요청 상태가 정상임을 클라이언트에 전송함
         await req_chk_payload.req_ok_write(writer)
@@ -166,10 +166,10 @@ async def handler(reader: asyncio.StreamReader, writer: asyncio.StreamWriter):
             # Device -> API Server
             # Device -> Raspberry
             if util.is_client_type_api(recv_client_type):
-                await payload_data.write(target_client_info_1[1].writer, to_sock=True)
+                await payload_data.write(target_client_info_1[1].writer, without_change=True)
                 print(f'[S] OK : Device -> API Server') if _debug else None
                 continue
-            elif util.is_client_type_device(recv_client_type):
+            elif util.is_client_type_raspberry(recv_client_type):
                 await payload_data.write(target_client_info_1[1].writer, to_sock=True)
                 print(
                     f'[S] OK : Device -> Raspberry{payload_data.raspberry_id, payload_data.raspberry_group}') if _debug else None

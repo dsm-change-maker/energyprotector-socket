@@ -29,6 +29,7 @@ def is_client_type_allowed(client_type: str) -> bool:
             client_type == constant.CLIENT_TYPE_RASPBERRY or \
             client_type == constant.CLIENT_TYPE_API:
         return True
+    print(client_type)
     return False
 
 
