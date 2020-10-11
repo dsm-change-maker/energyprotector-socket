@@ -136,26 +136,26 @@ async def handler(reader: asyncio.StreamReader, writer: asyncio.StreamWriter):
 
         # 요청 내용에 따른 동작 수행
         if util.is_client_type_api(client_type):
-            # API 서버 클라이언트는 라즈베리파이와 디바이스와 통신
-            # API Server -> Device or
-            # API Server -> Raspberry or
-            # API Server -> Device & Raspberry
+            # API 서버 클라이언트는 디바이스와 통신
+            # API Server -> Device
             if util.is_client_type_device(recv_client_type):
-                await payload_data.write(target_client_info_1[1].writer, to_device=True)
+                # 디바이스에 모든 정보를 전달하고
+                # 디바이스에서는 요청을 성공적으로 처리하면 그 결과를 라즈베리파이에도 전달함.
+                await payload_data.write(target_client_info_1[1].writer, to_sock=True)
                 print(
                     f'[S] OK : API Server -> Device{payload_data.device_id, payload_data.device_type}') if _debug else None
                 continue
-            elif util.is_client_type_raspberry(recv_client_type):
-                await payload_data.write(target_client_info_1[1].writer, to_raspberry=True)
-                print(
-                    f'[S] OK : API Server -> Raspberry{payload_data.raspberry_id, payload_data.raspberry_group}') if _debug else None
-                continue
-            elif len(recv_client_type) is 0:
-                await payload_data.write(target_client_info_1[1].writer, to_device=True)
-                await payload_data.write(target_client_info_2[1].writer, to_raspberry=True)
-                print(
-                    f'[S] OK : API Server -> Device{payload_data.device_id, payload_data.device_type}&Raspberry{payload_data.raspberry_id, payload_data.raspberry_group}') if _debug else None
-                continue
+            # elif util.is_client_type_raspberry(recv_client_type):
+            #     await payload_data.write(target_client_info_1[1].writer, to_raspberry=True)
+            #     print(
+            #         f'[S] OK : API Server -> Raspberry{payload_data.raspberry_id, payload_data.raspberry_group}') if _debug else None
+            #     continue
+            # elif len(recv_client_type) is 0:
+            #     await payload_data.write(target_client_info_1[1].writer, to_device=True)
+            #     await payload_data.write(target_client_info_2[1].writer, to_raspberry=True)
+            #     print(
+            #         f'[S] OK : API Server -> Device{payload_data.device_id, payload_data.device_type}&Raspberry{payload_data.raspberry_id, payload_data.raspberry_group}') if _debug else None
+            #     continue
             await req_chk_payload.err_write(writer)
             print(f'[S] error : Undefined - {util.client_type_to_str(recv_client_type)}') if _debug else None
         elif util.is_client_type_raspberry(client_type):

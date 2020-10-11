@@ -22,8 +22,6 @@ class ClientSendSignalRaspberry(client.ClientSendSignal):
         self.raspberry_group = raspberry_group
         self.recv_data: payload.Payload = payload.Payload()
 
-        self.device_close: bool = False
-        self.device_send: bool = False
         self.device_read: bool = False
         self.device_req_ok: bool = False
 
@@ -39,8 +37,20 @@ async def run_client_raspberry(signal: ClientSendSignalRaspberry, host=constant.
     print('[C] registered as a new client') if is_registered and debug else None
 
     while True:
+        # Device 에서 버튼이 눌렸을 때의 패킷 구조
+        # 'OK;6;CTL;;unit_index;on_off;device_id;device_type;\n'
         await signal.recv_data.read(client_raspberry.reader)
         print('[C] received : ', signal.recv_data.data) if debug else None
+        if signal.recv_data.client_type == 'CTL':
+            signal.device_req_ok = True
+            while True:
+                if not signal.device_req_ok:
+                    break
+        else:
+            signal.device_read = True
+            while True:
+                if not signal.device_read:
+                    break
         continue
 
     signal.req_ok = await client_raspberry.close()
