@@ -21,7 +21,6 @@ def press_button_interrupt(client_socket):
 
 
 def read_line(client_socket):
-    buffer = bytes(0)
     buffer = client_socket.recv(4096)
 
     buffering = True

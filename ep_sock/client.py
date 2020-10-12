@@ -46,7 +46,8 @@ class Client:
         self.send_data.client_type = self.client_type
         self.send_data.raspberry_id = self.raspberry_id
         self.send_data.raspberry_group = self.raspberry_group
-        await self.send_data.write(self.writer, to_sock=to_sock, to_raspberry=to_raspberry, to_device=to_device, recv_client_type=self.recv_client_type)
+        await self.send_data.write(self.writer, to_sock=to_sock, to_raspberry=to_raspberry, to_device=to_device,
+                                   recv_client_type=self.recv_client_type)
         await self.read()
         is_ok = self.recv_data.status and self.recv_data.client_type == constant.CLIENT_TYPE_REQ_OK
         self.recv_data.__init__()
@@ -130,8 +131,18 @@ def get_client(client_type=constant.CLIENT_TYPE_NONE, client_id='', client_group
 
 
 async def register_new_client(client_someone: Client):
+    client_someone.recv_client_type = constant.CLIENT_TYPE_REGISTER
     if await client_someone.write(to_sock=True):
         await client_someone.read()
         if client_someone.recv_data.status and client_someone.recv_data.client_type == constant.CLIENT_TYPE_REQ_OK:
             return True
     return False
+
+
+async def register_new_client_with_log(client_someone: Client, debug=False):
+    print(f'[C] Request client registration to remote server') if debug else None
+    is_registered = await register_new_client(client_someone)
+    print(f'[C] received : {len(client_someone.recv_data.data)} bytes') if debug else None
+    print('[C] registered as a new client') if is_registered and debug else None
+    print('[C] Already registered') if not is_registered and debug else None
+    return is_registered

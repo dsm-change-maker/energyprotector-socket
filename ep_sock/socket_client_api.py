@@ -27,10 +27,7 @@ async def run_client_api(signal: client.ClientSendSignal, host=constant.SERVER_U
     print('[C] RUN CLIENT_API') if debug else None
     client_api = ClientApi(host, port)
     await client_api.connect()
-
-    is_registered = await client.register_new_client(client_api)
-    print(f'[C] received : {len(client_api.recv_data.data)} bytes') if debug else None
-    print('[C] registered as a new client') if is_registered and debug else None
+    await client.register_new_client_with_log(client_api, debug=True)
 
     while True:
         if signal.close:

@@ -31,10 +31,7 @@ async def run_client_raspberry(signal: ClientSendSignalRaspberry, host=constant.
         print('[C] RUN CLIENT_RASPBERRY')
     client_raspberry = ClientRaspberry(signal.raspberry_id, signal.raspberry_group, host, port)
     await client_raspberry.connect()
-
-    is_registered = await client.register_new_client(client_raspberry)
-    print(f'[C] received : {len(client_raspberry.recv_data.data)} bytes') if debug else None
-    print('[C] registered as a new client') if is_registered and debug else None
+    await client.register_new_client_with_log(client_raspberry, debug=True)
 
     while True:
         # Device 에서 버튼이 눌렸을 때의 패킷 구조

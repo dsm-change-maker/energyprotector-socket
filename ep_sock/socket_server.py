@@ -45,6 +45,7 @@ async def handler(reader: asyncio.StreamReader, writer: asyncio.StreamWriter):
             return
         # 만약 클라이언트 타입이 허용되지 않은 값(or 정의되지 않은 값)이라면 Error 전송
         if not util.is_client_type_allowed(client_type):
+            print(f'[S] error : disallowed client type - {payload_data.data}') if _debug else None
             print(f'[S] error : disallowed client type - {peer_name}') if _debug else None
             await req_chk_payload.err_write(writer)
             continue
@@ -86,6 +87,10 @@ async def handler(reader: asyncio.StreamReader, writer: asyncio.StreamWriter):
                 client_info_str = '(' + payload_data.device_id + ', ' + payload_data.device_type + ')'
             print(f'[S] registered : new client{peer_name} - {util.client_type_to_str(client_type)}',
                   client_info_str) if _debug else None
+            continue
+        elif util.is_client_type_register(recv_client_type):
+            await req_chk_payload.err_write(writer)
+            print(f'[S] err : Client already registered')
             continue
 
         # 등록된 클라이언트의 정보를 가져온 결과에 대한 로그 출력

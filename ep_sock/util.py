@@ -36,6 +36,7 @@ def is_client_type_allowed(client_type: str) -> bool:
 def is_special_client_type(client_type: str) -> bool:
     if client_type == constant.CLIENT_TYPE_CLOSE or \
             client_type == constant.CLIENT_TYPE_REQ_OK or \
+            client_type == constant.CLIENT_TYPE_REGISTER or \
             client_type == constant.CLIENT_TYPE_NONE:
         return True
     return False
@@ -51,6 +52,10 @@ def is_client_type_req_ok(client_type: str) -> bool:
 
 def is_client_type_close(client_type: str) -> bool:
     return client_type == constant.CLIENT_TYPE_CLOSE
+
+
+def is_client_type_register(client_type: str) -> bool:
+    return client_type == constant.CLIENT_TYPE_REGISTER
 
 
 def is_client_type_api(client_type: str) -> bool:
@@ -70,6 +75,8 @@ def client_type_to_str(client_type):
         return 'CLIENT_TYPE_CLOSE'
     elif client_type == constant.CLIENT_TYPE_REQ_OK:
         return 'CLIENT_TYPE_REQ_OK'
+    elif client_type == constant.CLIENT_TYPE_REGISTER:
+        return 'CLIENT_TYPE_REGISTER'
     elif client_type == constant.CLIENT_TYPE_API:
         return 'CLIENT_TYPE_API'
     elif client_type == constant.CLIENT_TYPE_RASPBERRY:
