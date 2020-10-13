@@ -4,7 +4,7 @@ from ep_sock import constant
 
 # SERVER_URL = '52.78.77.85'
 # SERVER_PORT = 55642
-SERVER_URL = constant.SERVER_URL
+SERVER_URL = '192.168.43.15'#constant.SERVER_URL
 SERVER_PORT = constant.SERVER_PORT
 
 
@@ -26,7 +26,7 @@ def main():
         send_signal.raspberry_id = 'rasp_id_' + str(test_num)
         send_signal.raspberry_group = 'rasp_group_' + str(test_num)
         send_signal.device_id = 'device_id_' + str(test_num)
-        send_signal.device_type = 'switch'
+        send_signal.device_type = 'plug'
         send_signal.unit_index = unit_index
         send_signal.on_off = on_off
         send_signal.send = True

@@ -4,7 +4,7 @@ from ep_sock import constant
 
 # SERVER_URL = '52.78.77.85'
 # SERVER_PORT = 55642
-SERVER_URL = constant.SERVER_URL
+SERVER_URL = '192.168.43.15'#constant.SERVER_URL
 SERVER_PORT = constant.SERVER_PORT
 
 

@@ -175,7 +175,7 @@ async def handler(reader: asyncio.StreamReader, writer: asyncio.StreamWriter):
                 print(f'[S] OK : Device -> API Server') if _debug else None
                 continue
             elif util.is_client_type_raspberry(recv_client_type):
-                await payload_data.write(target_client_info_1[1].writer, to_sock=True)
+                await payload_data.write(target_client_info_1[1].writer, without_change=True)
                 print(
                     f'[S] OK : Device -> Raspberry{payload_data.raspberry_id, payload_data.raspberry_group}') if _debug else None
                 continue
