@@ -1,5 +1,5 @@
 import asyncio
-from ep_sock import client, constant, payload
+from ep_sock import client, constant, payload, util
 import threading
 
 
@@ -26,7 +26,8 @@ class ClientSendSignalRaspberry(client.ClientSendSignal):
         self.device_req_ok: bool = False
 
 
-async def run_client_raspberry(signal: ClientSendSignalRaspberry, host=constant.SERVER_URL, port=constant.SERVER_PORT, debug=False):
+async def run_client_raspberry(signal: ClientSendSignalRaspberry, host=constant.SERVER_URL, port=constant.SERVER_PORT,
+                               debug=False):
     if debug:
         print('[C] RUN CLIENT_RASPBERRY')
     client_raspberry = ClientRaspberry(signal.raspberry_id, signal.raspberry_group, host, port)
@@ -38,7 +39,7 @@ async def run_client_raspberry(signal: ClientSendSignalRaspberry, host=constant.
         # 'OK;6;CTL;;unit_index;on_off;device_id;device_type;\n'
         await signal.recv_data.read(client_raspberry.reader)
         print('[C] received : ', signal.recv_data.data) if debug else None
-        if signal.recv_data.client_type == 'CTL':
+        if util.is_device_req_packet(signal.recv_data.data):
             signal.device_req_ok = True
             while True:
                 if not signal.device_req_ok:
@@ -56,7 +57,8 @@ async def run_client_raspberry(signal: ClientSendSignalRaspberry, host=constant.
 
 
 class RunClientRaspberryThread(threading.Thread):
-    def __init__(self, signal: ClientSendSignalRaspberry, host=constant.SERVER_URL, port=constant.SERVER_PORT, debug=False):
+    def __init__(self, signal: ClientSendSignalRaspberry, host=constant.SERVER_URL, port=constant.SERVER_PORT,
+                 debug=False):
         threading.Thread.__init__(self)
         self.signal = signal
         self.debug = debug
@@ -69,3 +71,5 @@ class RunClientRaspberryThread(threading.Thread):
 
     def run(self):
         asyncio.run(self.main())
+
+

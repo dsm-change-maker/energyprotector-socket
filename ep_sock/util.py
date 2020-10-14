@@ -84,3 +84,8 @@ def client_type_to_str(client_type):
     elif client_type == constant.CLIENT_TYPE_DEVICE:
         return 'CLIENT_TYPE_DEVICE'
     return 'CLIENT_TYPE_NONE'
+
+
+def is_device_req_packet(packet_string):
+    ret = packet_string[:-1].split('`')
+    return ret[len(ret) - 1] == 'REQ'
