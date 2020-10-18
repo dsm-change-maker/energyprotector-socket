@@ -73,4 +73,5 @@ class RunClientApiThread(threading.Thread):
         while True:
             if not self.signal.close:
                 break
+        self.join()
 
