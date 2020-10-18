@@ -68,3 +68,9 @@ class RunClientApiThread(threading.Thread):
     def run(self):
         asyncio.run(self.main())
 
+    def stop(self):
+        self.signal.close = True
+        while True:
+            if not self.signal.close:
+                break
+

@@ -3,7 +3,7 @@ from ep_sock import constant
 
 
 def main():
-    server = SocketServer('192.168.43.15', constant.SERVER_PORT, debug=True)
+    server = SocketServer('127.0.0.1', constant.SERVER_PORT, debug=True)
     server.run()
 
 
