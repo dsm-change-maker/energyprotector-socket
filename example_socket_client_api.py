@@ -4,9 +4,8 @@ from ep_sock import constant
 
 # SERVER_URL = '52.78.77.85'
 # SERVER_PORT = 55642
-SERVER_URL = '127.0.0.1'#constant.SERVER_URL
-SERVER_PORT = constant.SERVER_PORT
-
+SERVER_URL = '13.209.17.106'
+SERVER_PORT = 59721
 
 def main():
     send_signal = ClientSendSignal()

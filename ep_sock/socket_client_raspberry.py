@@ -35,6 +35,8 @@ async def run_client_raspberry(signal: ClientSendSignalRaspberry, host=constant.
     await client.register_new_client_with_log(client_raspberry, debug=True)
 
     while True:
+        if signal.close:
+            break
         # Device 에서 버튼이 눌렸을 때의 패킷 구조
         # 'OK;6;CTL;;unit_index;on_off;device_id;device_type;\n'
         await signal.recv_data.read(client_raspberry.reader)

@@ -27,6 +27,7 @@ async def run_client_api(signal: client.ClientSendSignal, host=constant.SERVER_U
     print('[C] RUN CLIENT_API') if debug else None
     client_api = ClientApi(host, port)
     await client_api.connect()
+    print('[C] Connection Success') if debug else None
     await client.register_new_client_with_log(client_api, debug=True)
 
     while True:
