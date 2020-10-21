@@ -41,6 +41,7 @@ async def run_client_api(signal: client.ClientSendSignal, host=constant.SERVER_U
                 await client_api.read()
                 print('[C] received : ', client_api.recv_data.data) if debug else None
                 signal.req_ok = client_api.recv_data.status
+                print('[C] req status : ', client_api.recv_data.status) if debug else None
                 signal.send = False
                 continue
             print('[C] Request failed') if debug else None
